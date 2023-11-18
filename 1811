@@ -1,0 +1,394 @@
+// //Khai báo chân tín hiệu motor A
+// int enA = 3;
+// int in1 = 4;
+// int in2 = 5; 
+ int time=0;
+// //Khai báo chân tín hiệu cho motor B
+// int in3 = 6; 
+// int in4 = 7; 
+// int enB = 9;  
+ 
+// int i;
+ 
+// void setup()
+// {
+//     pinMode(enA, OUTPUT);
+//     pinMode(in1, OUTPUT);
+//     pinMode(in2, OUTPUT); 
+//     pinMode(enB,OUTPUT);
+//     pinMode(in3, OUTPUT);
+//     pinMode(in4, OUTPUT);
+// }
+ 
+// void chaymotor()
+// {
+//     // for(i=0;i<=120;i++){
+    
+//         digitalWrite(in3, HIGH);
+//         digitalWrite(in1, HIGH);
+//         digitalWrite(in4, LOW);
+//         digitalWrite(in2, LOW);
+//         analogWrite(enB, 100); 
+//         analogWrite(enA, 100); 
+//         // Serial.print(analogRead(enA));
+//         // Serial.print(analogRead(enB));
+//         delay(5000);
+
+//         Serial.print(analogRead(enA));
+//         Serial.print(analogRead(enB));
+//   // Serial.print(digitalRead(10));
+//   // Serial.print(digitalRead(12));
+//   // Serial.println(digitalRead(13));
+//   //Serial.print(digitalRead(A5));
+//   //Serial.print(digitalRead(A6));
+//   //Serial.println(digitalRead(A7));
+  
+//   //Serial.println(digitalRead(7));
+//   delay(2000);
+    
+//     // }// Tăng tốc động cơ từ Min >> Max
+//     // for(i=255;i>=0;i--){
+//     //     digitalWrite(in3, HIGH);
+//     //     digitalWrite(in1, HIGH);
+//     //     digitalWrite(in4, LOW);
+//     //     digitalWrite(in2, LOW);
+//     //     analogWrite(enB, i); 
+//     //     analogWrite(enA, i); 
+//     //     delay(100);
+    
+//     // }// Giảm tốc từ Max >> Min
+ 
+// } 
+ 
+// void loop() 
+// {
+//     chaymotor();
+//     delay(1000);
+// }
+
+
+// IR Sensors
+int sensor1 = 2;      // Leftmost sensor
+int sensor2 = 8;
+int sensor3 = 10;
+int sensor4 = 12;      // Rightmost sensor
+int sensor5 = 13;
+
+// Initial Values of Sensors
+int sensor[5] = {0, 0, 0, 0, 0};
+
+// Motor Variables
+int ENA = 3;
+int motorInput1 = 4;
+int motorInput2 = 5;
+int motorInput3 = 6;
+int motorInput4 = 7;
+int ENB = 9;
+
+// Initial Speed of Motor
+int initial_motor_speed = 30;
+
+// Output Pins for LED
+int ledPin1 = A3;
+int ledPin2 = A4;
+
+// PID Constants
+float Kp = 30;
+float Ki = 0;
+float Kd = 8;
+int sum_error = 0;
+int maxSpeed = 100;
+float left_motor_speed, right_motor_speed;
+
+float error = 0, PID_value;
+float previous_error = 0;
+
+int flag = 0;
+
+void setup()
+{
+  pinMode(sensor1, INPUT);
+  pinMode(sensor2, INPUT);
+  pinMode(sensor3, INPUT);
+  pinMode(sensor4, INPUT);
+  pinMode(sensor5, INPUT);
+
+  pinMode(motorInput1, OUTPUT);
+  pinMode(motorInput2, OUTPUT);
+  pinMode(motorInput3, OUTPUT);
+  pinMode(motorInput4, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+
+  digitalWrite(ledPin1, LOW);
+  digitalWrite(ledPin2, LOW);
+
+  Serial.begin(9600);                     // Setting serial monitor at a default baud rate of 9600
+  delay(500);
+  Serial.println("Started !!");
+  delay(1000);
+}
+
+void loop() {
+    
+  error = read_sensor_values();
+  do
+  {
+  if (error == -4) {
+
+    // do {
+    //   read_sensor_values();
+      analogWrite(ENA, 40); // Left Motor Speed
+      analogWrite(ENB, 85); // Right Motor Speed
+      forward();
+    //   sharpLeftTurn();
+    // } while (error != 0);
+  } else if (error == 4 ) {
+    analogWrite(ENA, 85); // Left Motor Speed
+    analogWrite(ENB, 40); // Right Motor Speed
+    forward();
+  } 
+  else if (error == 1 ) {
+    analogWrite(ENA, 85); // Left Motor Speed
+    analogWrite(ENB, 40); // Right Motor Speed
+    forward();
+  } 
+  else if (error == -1 ) {
+    analogWrite(ENA, 40); // Left Motor Speed
+    analogWrite(ENB, 85); // Right Motor Speed
+    forward();
+  } 
+  else if (error == 3 ){
+    analogWrite(ENA, 85); // Left Motor Speed
+    analogWrite(ENB, 50); // Right Motor Speed
+    forward();
+  }
+  else if (error == -3 ){
+    analogWrite(ENA, 45); // Left Motor Speed
+    analogWrite(ENB, 85); // Right Motor Speed
+    forward();
+  }
+  else if (error == -5 ){
+    analogWrite(ENA, 45); // Left Motor Speed
+    analogWrite(ENB, 85); // Right Motor Speed
+    forward();
+  }
+  else if (error == -6 ){
+    analogWrite(ENA, 50); // Left Motor Speed
+    analogWrite(ENB, 85); // Right Motor Speed
+    forward();
+  }
+  else if (error == 6 ){
+    analogWrite(ENA, 50); // Left Motor Speed
+    analogWrite(ENB, 85); // Right Motor Speed
+    forward();
+  }
+  else if (error == 2 ){
+    analogWrite(ENA, 70); // Left Motor Speed
+    analogWrite(ENB, 55); // Right Motor Speed
+    forward();
+  }
+  else if (error == -2 ){
+    analogWrite(ENA, 55); // Left Motor Speed
+    analogWrite(ENB, 70); // Right Motor Speed
+    forward();
+  }
+  else if (error == 5 ){
+    analogWrite(ENA, 80); // Left Motor Speed
+    analogWrite(ENB, 45); // Right Motor Speed
+    forward();
+  }
+ 
+  else if (error == 0 || error == 2 || error == -2){
+      analogWrite(ENA, 90); // Left Motor Speed
+    analogWrite(ENB, 90);
+    forward();
+    delay(80);
+    }
+  else if (error ==102) {
+    stop_bot();
+  } else if (error == 103) {
+       if (millis() - time > 7000)
+    do{
+      analogWrite(ENA, 60); // Left Motor Speed
+    analogWrite(ENB, 60); // Right Motor Speed
+    reverse();
+    delay(40);
+    } while (error == 0 || error == 2 || error == -2);
+    
+    
+    
+  } else 
+  {
+    analogWrite(ENA, 70); // Left Motor Speed
+    analogWrite(ENB, 70); // Right Motor Speed
+    forward();
+  }
+  error = read_sensor_values();
+  } while (error != 0);
+
+  //   if (error == -3) {
+  //     do {
+  //       analogWrite(ENA, 20); // Left Motor Speed
+  //       analogWrite(ENB, 25); // Right Motor Speed
+  //       sharpLeftTurn();
+  //       read_sensor_values();
+  //     } while (error != 0);
+  //   }
+  // } else if (error == 3) {
+  //   do {
+  //     analogWrite(ENA, 25); // Left Motor Speed
+  //     analogWrite(ENB, 20); // Right Motor Speed
+  //     sharpRightTurn();
+  //     read_sensor_values();
+  //     if (error == 0) {
+  //       forward();
+  //       delay(200);
+  //     }
+  //   } while (error != 0);
+  // } else if (error == -2) {
+  //   do {
+  //     read_sensor_values();
+  //     analogWrite(ENA, 23); // Left Motor Speed
+  //     analogWrite(ENB, 28); // Right Motor Speed
+  //     sharpLeftTurn();
+  //   } while (error != 0);
+  // } else if (error == 2) {
+  //   analogWrite(ENA, 28); // Left Motor Speed
+  //   analogWrite(ENB, 23); // Right Motor Speed
+  //   forward();
+  //   delay(200);
+  //   stop_bot();
+  //   read_sensor_values();
+
+  //   if (error == -1) {
+  //     do {
+  //       analogWrite(ENA, 25); // Left Motor Speed
+  //       analogWrite(ENB, 30); // Right Motor Speed
+  //       sharpLeftTurn();
+  //       read_sensor_values();
+  //     } while (error != 0);
+  //   }
+  // } else if (error == 1) {
+  //   do {
+  //     analogWrite(ENA, 30); // Left Motor Speed
+  //     analogWrite(ENB, 25); // Right Motor Speed
+  //     sharpRightTurn();
+  //     read_sensor_values();
+  //     if (error == 0) {
+  //       forward();
+  //       delay(200);
+  //     }
+  //   } while (error != 0);
+  // } else if (error == 103) {
+  //   stop_bot();
+  // } else if (error == 102) {
+  //   do {
+  //     reverse();
+  //     read_sensor_values();
+  //   } while (error != 0);
+  // } else {
+  //   calculate_pid();
+  //   motor_control();
+  // }
+}
+
+float read_sensor_values() {
+  sensor[0] = digitalRead(sensor1);
+  sensor[1] = digitalRead(sensor2);
+  sensor[2] = digitalRead(sensor3);
+  sensor[3] = digitalRead(sensor4);
+  sensor[4] = digitalRead(sensor5);
+
+  Serial.print(sensor[0]);
+  Serial.print("\t");
+  Serial.print(sensor[1]);
+  Serial.print("\t");
+  Serial.print(sensor[2]);
+  Serial.print("\t");
+  Serial.print(sensor[3]);
+  Serial.print("\t");
+  Serial.println(sensor[4]);
+
+  if ((sensor[0] == 0) && (sensor[1] == 1) && (sensor[2] == 1) && (sensor[3] == 1) && sensor[4] == 1)  // lệch phải nhiều
+    error = -4;
+  else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 1) && (sensor[3] == 1) && sensor[4] == 1)  // lệch phải nhiều
+    error = -3;
+  else if ((sensor[0] == 1) && (sensor[1] == 0) && (sensor[2] == 1) && (sensor[3] == 1) && sensor[4] == 1)
+    error = -2;
+  else if ((sensor[0] == 1) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[3] == 1) && sensor[4] == 1)
+    error = -1;
+  else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[3] == 1) && sensor[4] == 1)  
+    error = -5;
+    else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 0) && (sensor[3] == 0) && sensor[4] == 0)  
+    error = 5;
+  else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 0) && (sensor[3] ==01) && sensor[4] == 01)
+    error = 0;
+  else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 0) && (sensor[3] == 0) && sensor[4] == 01) // lệch trái nhiều
+error = 1;
+else if ((sensor[0] == 1) && (sensor[1] == 1) && (sensor[2] == 1) && (sensor[3] == 0) && sensor[4] == 1)
+error = 2;
+else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 01) && (sensor[3] == 0) && sensor[4] == 0)
+error = 3;
+else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 01) && sensor[3] == 01 && sensor[4] == 0) // lệch trái nhiều
+error = 4;
+else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 01) && sensor[3] == 0 && sensor[4] == 0) // lệch trái nhiều
+error = -6;
+else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 01) && sensor[3] == 01 && sensor[4] == 01) // lệch trái nhiều
+error = 6;
+
+else if ((sensor[0] == 0) && (sensor[1] == 0) && (sensor[2] == 0) && (sensor[3] == 0) && sensor[4] == 0) // Make U turn
+error = 102;
+else if ((sensor[0] == 01) && (sensor[1] == 01) && (sensor[2] == 01) && (sensor[3] == 01) && sensor[4] == 01) // stop
+error = 103;
+
+Serial.print("error=");
+Serial.println(error);
+return error;
+}
+
+
+
+
+void forward()
+{
+digitalWrite(motorInput2, LOW);
+digitalWrite(motorInput1, HIGH);
+digitalWrite(motorInput4, LOW);
+digitalWrite(motorInput3, HIGH);
+}
+
+void reverse()
+{
+digitalWrite(motorInput2, HIGH);
+digitalWrite(motorInput1, LOW);
+digitalWrite(motorInput4, HIGH);
+digitalWrite(motorInput3, LOW);
+}
+
+void right()
+{
+digitalWrite(motorInput1, LOW);
+digitalWrite(motorInput2, HIGH);
+digitalWrite(motorInput3, LOW);
+digitalWrite(motorInput4, LOW);
+}
+
+void left()
+{
+digitalWrite(motorInput1, LOW);
+digitalWrite(motorInput2, LOW);
+digitalWrite(motorInput3, LOW);
+digitalWrite(motorInput4, HIGH);
+}
+
+void stop_bot() {
+  /*The pin numbers and high, low values might be different depending on your connections */
+  digitalWrite(motorInput1, LOW);
+  digitalWrite(motorInput2, LOW);
+  digitalWrite(motorInput3, LOW);
+  digitalWrite(motorInput4, LOW);
+}
